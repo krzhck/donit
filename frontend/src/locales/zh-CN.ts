@@ -1,0 +1,63 @@
+export const zhCN = {
+  common: {
+    add: '添加',
+    delete: '删除',
+    save: '保存',
+    confirm: '确认',
+    cancel: '取消',
+    close: '关闭',
+    edit: '编辑',
+    loading: '加载中...',
+    tasks: '任务',
+  },
+  sidebar: {
+    inbox: '收件箱',
+    today: '今天',
+    lists: '列表',
+    profile: '个人中心',
+    newTask: '新建任务',
+  },
+  task: {
+    contentLabel: '任务内容',
+    dateLabel: '日期',
+    placeholder: '你想完成的事情',
+    statusCompleted: '已完成',
+    statusPending: '未完成',
+    noDate: '未设置日期',
+    countSuffix: '个任务',
+    completedStat: '已完成',
+    pendingSuffix: '项待办',
+  },
+  modal: {
+    createTitle: '创建任务',
+    editTitle: '编辑任务',
+    detailsTitle: '任务详情',
+    dueLabel: '到期日',
+  },
+  inbox: {
+    pageTitle: '收件箱',
+    emptyTitle: '暂无任务',
+    emptySubtitle: '添加第一个任务吧！',
+    sampleTasks: [
+      { id: -1, title: '示例：设计登录页', offsetDays: 0 },
+      { id: -2, title: '示例：构建 FastAPI 后端', offsetDays: 1 },
+      { id: -3, title: '示例：睡觉', offsetDays: -1 },
+    ],
+  },
+  delete: {
+    deleteConfirmTitle: '确认删除任务',
+    deleteConfirmDesc: '删除后无法恢复该任务，确认删除吗？',
+  },
+  today: {
+    title: '今天',
+    subtitle: '今天要完成的事项',
+  },
+  lists: {
+    title: '列表',
+    subtitle: '管理你的项目分组',
+  },
+  profile: {
+    title: '个人中心',
+    subtitle: '查看和编辑个人信息',
+  },
+} as const

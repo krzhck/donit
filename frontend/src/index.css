@@ -1,68 +1,328 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Layout */
+.app-container {
+  @apply min-h-screen bg-gray-50;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+.app-wrapper {
+  @apply flex;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.sidebar {
+  @apply w-64 h-screen sticky top-0 bg-white border-r border-gray-200 p-4;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.sidebar-header {
+  @apply flex items-center space-x-3 mb-6;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.sidebar-logo {
+  @apply w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center;
+}
+
+.sidebar-title {
+  @apply text-xl font-bold;
+}
+
+.sidebar-nav {
+  @apply space-y-1;
+}
+
+.sidebar-button-container {
+  @apply mt-6;
+}
+
+.main-content {
+  @apply flex-1 p-8;
+}
+
+.main-content-inner {
+  @apply max-w-5xl mx-auto;
+}
+
+/* Navigation Links */
+.nav-link {
+  @apply flex items-center space-x-2 px-3 py-2 rounded-md text-sm;
+}
+
+.nav-link-active {
+  @apply bg-red-50 text-red-600;
+}
+
+.nav-link-inactive {
+  @apply text-gray-700 hover:bg-gray-100;
+}
+
+/* Buttons */
+.btn {
+  @apply px-4 py-2 text-sm font-semibold rounded-lg transition;
+}
+
+.btn-primary {
+  @apply w-full flex items-center justify-center space-x-2 bg-red-500 text-white shadow-md hover:bg-red-600;
+}
+
+.btn-danger {
+  @apply text-white bg-red-600 hover:bg-red-700;
+}
+
+.btn-secondary {
+  @apply text-gray-600 hover:bg-gray-100;
+}
+
+.btn-disabled {
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-icon {
+  @apply text-lg leading-none;
+}
+
+.btn-text {
+  @apply text-sm font-semibold;
+}
+
+/* Modals & Dialogs */
+.modal-backdrop {
+  @apply fixed inset-0 z-50 flex items-center justify-center;
+}
+
+.modal-overlay {
+  @apply absolute inset-0 bg-black/40 backdrop-blur-sm;
+}
+
+.modal-content {
+  @apply relative bg-white rounded-2xl shadow-xl w-full mx-4 overflow-hidden;
+}
+
+.modal-header {
+  @apply px-6 pt-6 pb-3 border-b border-gray-100;
+}
+
+.modal-title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.modal-body {
+  @apply p-6 space-y-4;
+}
+
+.modal-footer {
+  @apply px-6 pb-6 pt-2 flex justify-end space-x-3 border-t border-gray-100 bg-gray-50;
+}
+
+/* Forms */
+.form-group {
+  @apply space-y-3;
+}
+
+.form-label {
+  @apply block;
+}
+
+.form-label-text {
+  @apply text-sm text-gray-700;
+}
+
+.form-input {
+  @apply mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/30 outline-none transition;
+}
+
+/* Page Headers */
+.page-header {
+  @apply px-2 mb-6;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.page-subtitle {
+  @apply text-sm text-gray-500;
+}
+
+/* Lists */
+.list-container {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.list-empty-state {
+  @apply px-8 py-16 text-center;
+}
+
+.list-empty-icon {
+  @apply w-16 h-16 mx-auto text-gray-300 mb-4;
+}
+
+.list-empty-title {
+  @apply text-gray-500 text-lg font-medium;
+}
+
+.list-empty-subtitle {
+  @apply text-gray-400 text-sm mt-1;
+}
+
+.list-loading {
+  @apply px-8 py-12 text-center;
+}
+
+.list-loading-spinner {
+  @apply inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-500;
+}
+
+.list-loading-text {
+  @apply mt-4 text-gray-500;
+}
+
+.list-items {
+  @apply divide-y divide-gray-100;
+}
+
+.list-item {
+  @apply px-8 py-4 hover:bg-gray-50 transition-colors cursor-pointer;
+}
+
+.list-item-content {
+  @apply flex items-start space-x-3;
+}
+
+.list-item-checkbox {
+  @apply flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-2 transition-all;
+}
+
+.list-item-checkbox-completed {
+  @apply bg-gray-400 border-gray-400;
+}
+
+.list-item-checkbox-pending {
+  @apply border-gray-300 hover:border-red-500;
+}
+
+.list-item-details {
+  @apply flex-1;
+}
+
+.list-item-title {
+  @apply text-sm;
+}
+
+.list-item-title-completed {
+  @apply line-through text-gray-400;
+}
+
+.list-item-title-pending {
+  @apply text-gray-800;
+}
+
+.list-item-date {
+  @apply mt-1 text-xs text-gray-500;
+}
+
+.list-item-action {
+  @apply opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 transition-all;
+}
+
+.list-stats {
+  @apply mt-4 px-4 py-3 bg-white rounded-lg border border-gray-200 flex items-center justify-between text-sm text-gray-600;
+}
+
+/* Todo Items */
+.todo-checkbox {
+  @apply w-full h-full text-white;
+}
+
+.todo-icon {
+  @apply w-5 h-5;
+}
+
+/* Status Badges */
+.badge {
+  @apply px-2 py-1 text-xs rounded-full;
+}
+
+.badge-completed {
+  @apply bg-green-100 text-green-700;
+}
+
+.badge-pending {
+  @apply bg-gray-100 text-gray-700;
+}
+
+/* Preview */
+.preview-content {
+  @apply space-y-3;
+}
+
+.preview-meta {
+  @apply flex items-center space-x-2;
+}
+
+.preview-text {
+  @apply text-base text-gray-900 leading-relaxed;
+}
+/* Error Notification */
+.notification-container {
+  @apply fixed bottom-4 right-4 z-40 max-w-md space-y-2;
+}
+
+.notification-item {
+  @apply rounded-lg shadow-lg p-4 text-white;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  a:hover {
-    color: #747bff;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  button {
-    background-color: #f9f9f9;
-  }
+}
+
+.notification-item-error {
+  @apply bg-red-600;
+}
+
+.notification-item-warning {
+  @apply bg-yellow-600;
+}
+
+.notification-item-info {
+  @apply bg-blue-600;
+}
+
+.notification-content {
+  @apply flex items-start justify-between gap-3;
+}
+
+.notification-text {
+  @apply flex-1;
+}
+
+.notification-title {
+  @apply font-semibold;
+}
+
+.notification-details {
+  @apply text-sm mt-1 opacity-90 break-words max-h-40 overflow-y-auto;
+}
+
+.notification-close-button {
+  @apply flex-shrink-0 text-white hover:opacity-75;
+}
+
+.notification-close-icon {
+  @apply w-5 h-5;
 }
