@@ -1,13 +1,16 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { User, CircleCheckBig, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { CreateTodoModal } from './components/CreateTodoModal'
 import { ErrorNotificationCenter } from './components/ErrorNotificationCenter'
 import { useTodoModal } from './contexts/TodoModalContext'
 import { t } from './locales'
 import { setApiErrorHandler } from './api/Client'
 import { showErrorNotification } from './components/ErrorNotificationCenter'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 function AppContent() {
+  const navigate = useNavigate()
+  const [sidebarVisible, setSidebarVisible] = useState(true)
   const { isTodoModalOpen, editingTodo, closeModal, openCreateModal, saveTodo } = useTodoModal()
 
   useEffect(() => {
@@ -27,18 +30,48 @@ function AppContent() {
     closeModal()
   }
 
+  const handleProfileClick = () => {
+    navigate('/app/profile')
+  }
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible)
+  }
+
   return (
     <>
       <div className="app-container">
         <div className="app-wrapper">
           {/* Sidebar */}
-          <aside className="sidebar">
-            <div className="sidebar-header">
-              <div className="sidebar-logo">
-                <span className="text-white font-bold text-lg">D</span>
+          <aside className={`sidebar ${!sidebarVisible ? 'sidebar-hidden' : ''}`}>
+            <div className="sidebar-header-wrapper">
+              <div className="sidebar-header">
+                <div className="sidebar-logo">
+                  <CircleCheckBig size={28} className="text-red-500" fill="white" />
+                </div>
+                <span className="sidebar-title">Donit</span>
               </div>
-              <span className="sidebar-title">Donit</span>
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className="sidebar-toggle-btn"
+                title="Toggle sidebar"
+              >
+                <PanelLeftClose size={20} className="text-gray-600" />
+              </button>
             </div>
+            
+            <div className="sidebar-button-container">
+              <button
+                type="button"
+                onClick={openCreateTodo}
+                className="btn btn-new-task"
+              >
+                <span className="btn-icon">＋</span>
+                <span className="btn-text">{t.sidebar.newTask}</span>
+              </button>
+            </div>
+
             <nav className="sidebar-nav">
               <NavLink to="/app/inbox" className={({ isActive }) =>
                 `nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`
@@ -48,26 +81,33 @@ function AppContent() {
               }>🗓️ {t.sidebar.today}</NavLink>
               <NavLink to="/app/lists" className={({ isActive }) =>
                 `nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`
-              }># {t.sidebar.lists}</NavLink>
-              <NavLink to="/app/profile" className={({ isActive }) =>
-                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`
-              }>👤 {t.sidebar.profile}</NavLink>
+              }>🏷️ {t.sidebar.lists}</NavLink>
             </nav>
 
-            <div className="sidebar-button-container">
+            <div className="sidebar-footer">
               <button
                 type="button"
-                onClick={openCreateTodo}
-                className="btn btn-primary"
+                onClick={handleProfileClick}
+                className="profile-avatar-btn"
+                title={t.sidebar.profile}
               >
-                <span className="btn-icon">＋</span>
-                <span className="btn-text">{t.sidebar.newTask}</span>
+                <User size={24} className="text-gray-600" />
               </button>
             </div>
           </aside>
 
           {/* Content */}
           <main className="main-content">
+            {!sidebarVisible && (
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className="sidebar-expand-btn"
+                title="Open sidebar"
+              >
+                <PanelLeftOpen size={20} className="text-gray-600" />
+              </button>
+            )}
             <div className="main-content-inner">
               <Outlet />
             </div>
