@@ -39,6 +39,7 @@
   - 代码片段生成  
   - Bug 定位  
   - 文档初稿编写  
+  - 优化建议（customevent，showerror）
 - AI 输出如何修改：例如“AI 给出的方案用了 localStorage，我改成了 IndexedDB 以支持更复杂数据”。  
 
 ## 5. 运行与测试方式
