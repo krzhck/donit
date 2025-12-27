@@ -7,26 +7,49 @@ interface ErrorNotification {
   type: 'error' | 'warning' | 'info'
 }
 
+type NotificationPayload = {
+  message: string
+  details?: string
+  type?: ErrorNotification['type']
+}
+
+type NotificationListener = (payload: NotificationPayload) => void
+
+const listeners = new Set<NotificationListener>()
+
+function createNotificationId() {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : Date.now().toString()
+}
+
+function subscribe(listener: NotificationListener) {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+function emitNotification(payload: NotificationPayload) {
+  listeners.forEach(listener => listener(payload))
+}
+
 export function ErrorNotificationCenter() {
   const [notifications, setNotifications] = useState<ErrorNotification[]>([])
 
   useEffect(() => {
-    const handleShowError = (event: CustomEvent) => {
-      const { message, details, type = 'error' } = event.detail
-      const id = Date.now().toString()
+    const unsubscribe = subscribe(({ message, details, type = 'error' }) => {
+      const id = createNotificationId()
       const notification: ErrorNotification = { id, message, details, type }
-      
+
       setNotifications(prev => [...prev, notification])
       console.error(`[${type.toUpperCase()}]`, message, details)
-      
+
       // 自动关闭
       setTimeout(() => {
         setNotifications(prev => prev.filter(n => n.id !== id))
       }, 15000)
-    }
+    })
 
-    window.addEventListener('show-error', handleShowError as EventListener)
-    return () => window.removeEventListener('show-error', handleShowError as EventListener)
+    return unsubscribe
   }, [])
 
   const removeNotification = (id: string) => {
@@ -71,19 +94,13 @@ export function ErrorNotificationCenter() {
 }
 
 export function showErrorNotification(message: string, details?: string) {
-  window.dispatchEvent(new CustomEvent('show-error', {
-    detail: { message, details, type: 'error' }
-  }))
+  emitNotification({ message, details, type: 'error' })
 }
 
 export function showWarningNotification(message: string, details?: string) {
-  window.dispatchEvent(new CustomEvent('show-error', {
-    detail: { message, details, type: 'warning' }
-  }))
+  emitNotification({ message, details, type: 'warning' })
 }
 
 export function showInfoNotification(message: string, details?: string) {
-  window.dispatchEvent(new CustomEvent('show-error', {
-    detail: { message, details, type: 'info' }
-  }))
+  emitNotification({ message, details, type: 'info' })
 }

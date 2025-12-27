@@ -4,8 +4,10 @@ import { t } from '../locales'
 interface TodoPreview {
   id: number
   title: string
+  description?: string
   completed: boolean
-  dueDate?: string
+  taskDate?: string
+  category?: string
 }
 
 interface TodoPreviewModalProps {
@@ -18,9 +20,9 @@ interface TodoPreviewModalProps {
 export function TodoPreviewModal({ open, todo, onClose, onEdit }: TodoPreviewModalProps) {
   if (!todo) return null
 
-  const formattedDate = todo.dueDate
-    ? new Date(todo.dueDate).toLocaleDateString()
-    : t.task.noDate
+  const formattedDate = todo.taskDate
+    ? new Date(todo.taskDate).toLocaleDateString()
+    : t.common.none
 
   return (
     <Modal
@@ -54,9 +56,15 @@ export function TodoPreviewModal({ open, todo, onClose, onEdit }: TodoPreviewMod
           <span className={`badge ${todo.completed ? 'badge-completed' : 'badge-pending'}`}>
             {todo.completed ? t.task.statusCompleted : t.task.statusPending}
           </span>
-          <span className="text-sm text-gray-500">{t.modal.dueLabel}：{formattedDate}</span>
+          <span className="text-sm text-gray-500">{t.modal.dateLabel}：{formattedDate}</span>
+          {todo.category && (
+            <span className="text-sm text-gray-500">{t.task.categoryLabel}：{todo.category}</span>
+          )}
         </div>
         <p className="preview-text">{todo.title}</p>
+        {todo.description && (
+          <p className="text-sm text-gray-600 mt-2 whitespace-pre-wrap">{todo.description}</p>
+        )}
       </div>
     </Modal>
   )

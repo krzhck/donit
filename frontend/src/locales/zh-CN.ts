@@ -9,6 +9,7 @@ export const zhCN = {
     edit: '编辑',
     loading: '加载中...',
     tasks: '任务',
+    none: '无',
   },
   sidebar: {
     inbox: '收件箱',
@@ -20,6 +21,12 @@ export const zhCN = {
   task: {
     contentLabel: '任务内容',
     dateLabel: '日期',
+    categoryLabel: '分类',
+    categoryAdd: '添加分类',
+    categoryNewPlaceholder: '输入新分类名称',
+    categoryLoading: '加载分类中...',
+    descriptionLabel: '描述',
+    descriptionPlaceholder: '添加任务的详细描述...',
     placeholder: '你想完成的事情',
     statusCompleted: '已完成',
     statusPending: '未完成',
@@ -33,6 +40,7 @@ export const zhCN = {
     editTitle: '编辑任务',
     detailsTitle: '任务详情',
     dueLabel: '到期日',
+    dateLabel: '日期',
   },
   inbox: {
     pageTitle: '收件箱',
@@ -59,5 +67,10 @@ export const zhCN = {
   profile: {
     title: '个人中心',
     subtitle: '查看和编辑个人信息',
+  },
+  errors: {
+    backendError: '后端错误',
+    unknownError: '未知错误',
+    noStatusCode: '无状态码',
   },
 } as const

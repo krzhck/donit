@@ -1,19 +1,31 @@
 import { createContext, useContext, useState, useCallback } from 'react'
+import type { ReactNode } from 'react'
+
+export type TodoSavePayload = {
+  id?: number
+  title: string
+  description?: string
+  taskDate?: string | null
+  categoryId?: number
+  mode: 'create' | 'edit'
+}
 
 interface TodoModalContextType {
   isTodoModalOpen: boolean
-  editingTodo: { id: number; title: string; completed: boolean; dueDate?: string } | null
+  editingTodo: { id: number; title: string; description?: string; completed: boolean; taskDate?: string; category?: string; categoryId?: number } | null
   openCreateModal: () => void
-  openEditModal: (todo: { id: number; title: string; completed: boolean; dueDate?: string }) => void
+  openEditModal: (todo: { id: number; title: string; description?: string; completed: boolean; taskDate?: string; category?: string; categoryId?: number }) => void
   closeModal: () => void
-  setSaveCallback: (callback: (payload: { title: string; dueDate?: string }) => Promise<void>) => void
+  registerSaveCallback: (callback: ((payload: TodoSavePayload) => Promise<void>) | null) => void
+  saveTodo: (payload: TodoSavePayload) => Promise<void>
 }
 
 const TodoModalContext = createContext<TodoModalContextType | undefined>(undefined)
 
-export function TodoModalProvider({ children }: { children: React.ReactNode }) {
+export function TodoModalProvider({ children }: { children: ReactNode }) {
   const [isTodoModalOpen, setIsTodoModalOpen] = useState(false)
   const [editingTodo, setEditingTodo] = useState<TodoModalContextType['editingTodo']>(null)
+  const [saveCallback, setSaveCallback] = useState<((payload: TodoSavePayload) => Promise<void>) | null>(null)
 
   const openCreateModal = useCallback(() => {
     setEditingTodo(null)
@@ -30,9 +42,17 @@ export function TodoModalProvider({ children }: { children: React.ReactNode }) {
     setEditingTodo(null)
   }, [])
 
-  const setSaveCallback = useCallback(() => {
-    // pages/Inbox 在 window.dispatchEvent('save-todo') 时直接使用
+  const registerSaveCallback = useCallback((callback: ((payload: TodoSavePayload) => Promise<void>) | null) => {
+    setSaveCallback(() => callback)
   }, [])
+
+  const saveTodo = useCallback(async (payload: TodoSavePayload) => {
+    if (saveCallback) {
+      await saveCallback(payload)
+    } else {
+      console.warn('No save callback registered for TodoModal')
+    }
+  }, [saveCallback])
 
   return (
     <TodoModalContext.Provider
@@ -42,7 +62,8 @@ export function TodoModalProvider({ children }: { children: React.ReactNode }) {
         openCreateModal,
         openEditModal,
         closeModal,
-        setSaveCallback,
+        registerSaveCallback,
+        saveTodo,
       }}
     >
       {children}

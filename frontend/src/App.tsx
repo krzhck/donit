@@ -3,18 +3,27 @@ import { CreateTodoModal } from './components/CreateTodoModal'
 import { ErrorNotificationCenter } from './components/ErrorNotificationCenter'
 import { useTodoModal } from './contexts/TodoModalContext'
 import { t } from './locales'
+import { setApiErrorHandler } from './api/Client'
+import { showErrorNotification } from './components/ErrorNotificationCenter'
+import { useEffect } from 'react'
 
 function AppContent() {
-  const { isTodoModalOpen, editingTodo, closeModal, openCreateModal } = useTodoModal()
+  const { isTodoModalOpen, editingTodo, closeModal, openCreateModal, saveTodo } = useTodoModal()
+
+  useEffect(() => {
+    setApiErrorHandler(({ status, message, details }) => {
+      showErrorNotification(`${t.errors.backendError}: ${status} ${message}`, details)
+    })
+    return () => setApiErrorHandler(null)
+  }, [])
 
   const openCreateTodo = () => {
     openCreateModal()
   }
 
-  const handleSaveTodo = async (payload: { title: string; dueDate?: string }) => {
-    // 触发全局保存事件，由 Inbox 或其他页面处理
+  const handleSaveTodo = async (payload: { title: string; description?: string; taskDate?: string | null; categoryId?: number }) => {
     const mode = editingTodo ? 'edit' : 'create'
-    window.dispatchEvent(new CustomEvent('save-todo', { detail: { ...payload, id: editingTodo?.id, mode } }))
+    await saveTodo({ ...payload, id: editingTodo?.id, mode })
     closeModal()
   }
 
@@ -70,7 +79,9 @@ function AppContent() {
       <CreateTodoModal
         open={isTodoModalOpen}
         initialTitle={editingTodo?.title}
-        initialDueDate={editingTodo?.dueDate}
+        initialDescription={editingTodo?.description}
+        initialTaskDate={editingTodo?.taskDate}
+        initialCategoryId={editingTodo?.categoryId}
         mode={editingTodo ? 'edit' : 'create'}
         onSave={handleSaveTodo}
         onCancel={closeModal}

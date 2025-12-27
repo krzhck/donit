@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { todoApi, type Todo } from '../api/todoClient'
-import { useTodoModal } from '../contexts/TodoModalContext'
+import { useCallback, useEffect, useState } from 'react'
+import { todoApi, type Todo } from '../api/Client'
+import { useTodoModal, type TodoSavePayload } from '../contexts/TodoModalContext'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { TodoPreviewModal } from '../components/TodoPreviewModal'
 import { t } from '../locales'
@@ -10,15 +10,10 @@ interface LocalTodo {
   id: number
   title: string
   completed: boolean
-  dueDate?: string
+  taskDate?: string
   description?: string
-}
-
-interface SaveTodoPayload {
-  id?: number
-  title: string
-  dueDate?: string
-  mode?: 'create' | 'edit'
+  category?: string
+  categoryId?: number
 }
 
 // 占位任务
@@ -26,17 +21,31 @@ const placeholderTodos: LocalTodo[] = t.inbox.sampleTasks.map(sample => ({
   id: sample.id,
   title: sample.title,
   completed: sample.id === -3,
-  dueDate: new Date(Date.now() + sample.offsetDays * 24 * 3600 * 1000).toISOString().slice(0, 10),
+  taskDate: new Date(Date.now() + sample.offsetDays * 24 * 3600 * 1000).toISOString().slice(0, 10),
+  category: 'inbox',
 }))
 
 // 转换后端任务到前端格式
 function convertToLocalTodo(apiTodo: Todo): LocalTodo {
+  const categoryValue = apiTodo.category
+  const categoryName = typeof categoryValue === 'string'
+    ? categoryValue
+    : categoryValue?.name || 'inbox'
+  const categoryId = typeof categoryValue === 'object' ? categoryValue?.id : undefined
+  
+  let taskDate: string | undefined
+  if (apiTodo.task_date) {
+    taskDate = apiTodo.task_date
+  }
+  
   return {
     id: apiTodo.id,
     title: apiTodo.title,
     completed: apiTodo.is_completed,
     description: apiTodo.description,
-    dueDate: apiTodo.created_at?.slice(0, 10),
+    taskDate,
+    category: categoryName,
+    categoryId,
   }
 }
 
@@ -47,38 +56,66 @@ export default function Inbox() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [selectedTodo, setSelectedTodo] = useState<LocalTodo | null>(null)
   const [todoToDelete, setTodoToDelete] = useState<LocalTodo | null>(null)
-  const { openCreateModal, openEditModal, setSaveCallback } = useTodoModal()
+  const { openEditModal, registerSaveCallback } = useTodoModal()
+
+  const handleSaveTodo = useCallback(async (payload: TodoSavePayload) => {
+    const { id, title, description, taskDate, categoryId } = payload
+
+    // 编辑占位任务
+    if (typeof id === 'number' && id < 0) {
+      setTodos(prev => prev.map(t => t.id === id ? { ...t, title, taskDate } : t))
+      return
+    }
+
+    // 编辑真实任务
+    if (typeof id === 'number') {
+      try {
+        const updatePayload = {
+          title,
+          description,
+          category_id: categoryId,
+          task_date: taskDate || null,
+        }
+        await todoApi.update(id, updatePayload)
+        const res = await todoApi.getAll()
+        const updated = res.data.find(t => t.id === id)
+        if (updated) {
+          const updatedLocal = convertToLocalTodo(updated)
+          setTodos(prev => prev.map(t => t.id === id ? updatedLocal : t))
+        }
+      } catch (err) {
+        // axios 拦截器处理
+      }
+      return
+    }
+
+    // 创建新任务
+    try {
+      const createPayload = {
+        title,
+        description,
+        category_id: categoryId,
+        task_date: taskDate || null,
+      }
+      const res = await todoApi.create(createPayload)
+      const newTodo = convertToLocalTodo(res.data)
+      setTodos(prev => [...prev, newTodo])
+    } catch (err) {
+      // axios 拦截器处理
+    }
+  }, [])
 
   useEffect(() => {
     loadTodos()
   }, [])
 
   useEffect(() => {
-    const handleOpenCreate = () => {
-      openCreateModal()
-    }
-    window.addEventListener('open-create-todo', handleOpenCreate)
-    return () => window.removeEventListener('open-create-todo', handleOpenCreate)
-  }, [openCreateModal])
-
-  useEffect(() => {
-    // 监听新建todo
-    const handleSaveTodoEvent = async (event: Event) => {
-      const customEvent = event as CustomEvent
-      const payload = customEvent.detail as SaveTodoPayload
-      await handleSaveTodo(payload)
-    }
-    window.addEventListener('save-todo', handleSaveTodoEvent)
-    return () => window.removeEventListener('save-todo', handleSaveTodoEvent)
-  }, [todos])
-
-  useEffect(() => {
     // 注册保存回调（用于编辑功能）
-    const saveTodoCallback = async (payload: SaveTodoPayload) => {
+    registerSaveCallback(async (payload: TodoSavePayload) => {
       await handleSaveTodo(payload)
-    }
-    setSaveCallback(saveTodoCallback)
-  }, [todos, setSaveCallback])
+    })
+    return () => registerSaveCallback(null)
+  }, [handleSaveTodo, registerSaveCallback])
 
   const loadTodos = async () => {
     try {
@@ -94,44 +131,6 @@ export default function Inbox() {
       setTodos(placeholderTodos)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const handleSaveTodo = async (payload: SaveTodoPayload) => {
-    const { id, title, dueDate } = payload
-
-    // 编辑占位任务
-    if (typeof id === 'number' && id < 0) {
-      setTodos(prev => prev.map(t => t.id === id ? { ...t, title, dueDate } : t))
-      return
-    }
-
-    // 编辑真实任务
-    if (typeof id === 'number') {
-      try {
-        const updatePayload = {
-          title,
-          description: title,
-        }
-        await todoApi.update(id, updatePayload)
-        setTodos(prev => prev.map(t => t.id === id ? { ...t, title, dueDate } : t))
-      } catch (err) {
-        // axios 拦截器处理
-      }
-      return
-    }
-
-    // 创建新任务
-    try {
-      const createPayload = {
-        title,
-        description: title, // 暂时用 title 也作为 description
-      }
-      const res = await todoApi.create(createPayload)
-      const newTodo = convertToLocalTodo(res.data)
-      setTodos(prev => [...prev, newTodo])
-    } catch (err) {
-      // axios 拦截器处理
     }
   }
 
@@ -250,7 +249,7 @@ export default function Inbox() {
                     <p className={`list-item-title ${todo.completed ? 'list-item-title-completed' : 'list-item-title-pending'}`}>
                       {todo.title}
                     </p>
-                    <p className="list-item-date">{t.modal.dueLabel}：{todo.dueDate ? new Date(todo.dueDate).toLocaleDateString() : t.task.noDate}</p>
+                    <p className="list-item-date">{t.modal.dateLabel}：{todo.taskDate ? new Date(todo.taskDate).toLocaleDateString() : t.common.none}</p>
                   </div>
                   <button
                     onClick={(e) => {
