@@ -25,7 +25,10 @@ function createNotificationId() {
 
 function subscribe(listener: NotificationListener) {
   listeners.add(listener)
-  return () => listeners.delete(listener)
+  return () => {
+    // 清理时不返回值，避免 useEffect 类型错误
+    listeners.delete(listener)
+  }
 }
 
 function emitNotification(payload: NotificationPayload) {

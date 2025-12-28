@@ -1,10 +1,14 @@
+import { TaskList } from '../components/TaskList'
 import { t } from '../locales'
 
 export default function Today() {
   return (
-    <div className="px-8 pt-8 pb-4">
-      <h2 className="text-2xl font-bold text-gray-900">{t.today.title}</h2>
-      <p className="text-sm text-gray-500">{t.today.subtitle}</p>
-    </div>
+    <TaskList
+      title={t.today.title}
+      subtitle={t.today.subtitle}
+      emptyTitle={t.inbox.emptyTitle}
+      emptySubtitle={t.inbox.emptySubtitle}
+      filter={{ taskDateIsToday: true }}
+    />
   )
 }

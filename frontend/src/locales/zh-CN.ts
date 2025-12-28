@@ -9,6 +9,7 @@ export const zhCN = {
     edit: '编辑',
     loading: '加载中...',
     tasks: '任务',
+    rename: '重命名',
     none: '无',
   },
   sidebar: {
@@ -33,7 +34,6 @@ export const zhCN = {
     noDate: '未设置日期',
     countSuffix: '个任务',
     completedStat: '已完成',
-    pendingSuffix: '项待办',
   },
   modal: {
     createTitle: '创建任务',
@@ -43,7 +43,7 @@ export const zhCN = {
     dateLabel: '日期',
   },
   inbox: {
-    pageTitle: '收件箱',
+    pageTitle: '📥 收件箱',
     emptyTitle: '暂无任务',
     emptySubtitle: '添加第一个任务吧！',
     sampleTasks: [
@@ -56,16 +56,26 @@ export const zhCN = {
     deleteConfirmTitle: '确认删除任务',
     deleteConfirmDesc: '删除后无法恢复该任务，确认删除吗？',
   },
+  category: {
+    deleteConfirmTitle: '确认删除分类',
+    deleteConfirmDesc: '将删除该分类及其下的所有任务，删除后无法恢复。确认删除吗？',
+    deleteConfirmWithCount: '将删除该分类及其下的所有任务（共 {count} 条），删除后无法恢复。确认删除吗？',
+    renameEmptyError: '分类名称不能为空',
+    renameDuplicateError: '分类名称已存在，请使用不同名称',
+    renameSave: '保存',
+    renameCancel: '取消',
+    countSuffix: '个分类',
+  },
   today: {
-    title: '今天',
+    title: '🗓 今天',
     subtitle: '今天要完成的事项',
   },
   lists: {
-    title: '列表',
+    title: '🏷 列表',
     subtitle: '管理你的项目分组',
   },
   profile: {
-    title: '个人中心',
+    title: '👤 个人中心',
     subtitle: '查看和编辑个人信息',
   },
   errors: {

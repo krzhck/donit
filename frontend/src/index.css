@@ -92,6 +92,11 @@ body {
   @apply px-4 py-2 text-sm font-semibold rounded-lg transition;
 }
 
+/* Inline action buttons: compact height, no wrapping */
+.btn-action {
+  @apply h-8 px-3 whitespace-nowrap;
+}
+
 .btn-new-task {
   @apply w-full flex items-center justify-center space-x-2 bg-white text-red-500 border-0 hover:bg-red-50 transition-colors;
 }
@@ -261,7 +266,7 @@ body {
 }
 
 .list-stats {
-  @apply mt-4 px-4 py-3 bg-white rounded-lg border border-gray-200 flex items-center justify-between text-sm text-gray-600;
+  @apply mt-4 px-2 py-2 flex items-center justify-end text-sm text-gray-600;
 }
 
 /* Todo Items */
