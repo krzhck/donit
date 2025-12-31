@@ -19,32 +19,45 @@
       pages/
   backend/
     app/
+      config.py
     	crud.py
     	database.py
     	main.py
     	models.py
     	schemas.py
   ```
-- 模块职责说明。  
+- 模块职责说明
+
+  - `backend/models.py` / `schemas.py`：定义 DB 表结构与 API 输入/输出模型
+  - `backend/crud.py`：封装数据库操作
+  - `backend/routers/todos.py`：暴露 REST 接口
+  - `frontend/api/Client.ts`：封装对后端 API 的调用
+  - `frontend/components`：UI 组件，负责展示和用户交互
+  - `frontend/pages`：页面级组件，组织布局和路由
+  - `frontend/contexts`：全局状态管理
+  - `frontend/locales`：多语言支持资源文件
+
+
+> <img src="/Users/krzhck/donit/asset/inbox-page.jpg" alt="inbox-page" style="zoom:20%;" /> <img src="/Users/krzhck/donit/asset/lists-page.jpg" alt="lists-page" style="zoom:20%;" /> 
+>
+> 前端主要页面截图  
 
 ## 3. 需求细节与决策
-- 描述是否必填？如何处理空输入？  
-- 已完成的任务在 UI 或 CLI 中如何显示？  
-- 任务排序逻辑（默认按创建时间，用户可选按优先级）。  
-- 如果涉及扩展功能（例如同步/提醒），简述设计思路。  
+- 描述日期非必填，默认分类进入 inbox，前端处理空输入。
+- 已完成的任务可以在“已完成”视图查看，支持批量删除。  
+- 用户可自定义任务分类，并在列表视图按分类查看任务。 
+- 删除操作需要二次确认，防止误操作。
 
 ## 4. AI 使用说明
-- 是否使用 AI 工具？（ChatGPT / Copilot / Cursor / 其他）  
+- 使用 Copilot 和 Gemini
 - 使用 AI 的环节：  
-  - 代码片段生成  
-  - Bug 定位  
-  - 文档初稿编写  
+  - 方案讨论
+  - 部分代码生成
+  - 前端样式
   - 优化建议（customevent，showerror）
-- AI 输出如何修改：例如“AI 给出的方案用了 localStorage，我改成了 IndexedDB 以支持更复杂数据”。  
+- AI 输出修改：AI 给出纯前端 + localStorage 方案，改为前后端 + SQLite 以支持多设备/多用户扩展能力。  
 
 ## 5. 运行与测试方式
-### 本地运行
-
 #### 后端
 
 ```bash
@@ -63,10 +76,17 @@ npm install
 npm run dev # http://localhost:5173
 ```
 
-### 已测试环境
+#### 已测试环境
 
 Node.js v24; Python 3.8; macOS 26
 
 ## 6. 总结与反思
 - 如果有更多时间，你会如何改进？  
+  - 增加用户认证和多用户数据隔离。
+  - 增加任务通知推送。
+  - 增加更丰富的 task 字段（优先级、标签等）。
 - 你觉得这个实现的最大亮点是什么？  
+  - 简洁且可演进的全栈结构：前后端分离、类型契约明确，容易在后续扩展同步/权限功能。
+  - FastAPI 与 Pydantic/SQLModel 的使用使 API 类型安全且自带可交互文档。
+  - Tailwind CSS 让前端样式开发高效且易于维护。
+  - 预留多语言支持。
