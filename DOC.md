@@ -38,7 +38,7 @@
   - `frontend/locales`：多语言支持资源文件
 
 
-> <img src="/Users/krzhck/donit/asset/inbox-page.jpg" alt="inbox-page" style="zoom:20%;" /> <img src="/Users/krzhck/donit/asset/lists-page.jpg" alt="lists-page" style="zoom:20%;" /> 
+> <img src="./asset/inbox-page.jpg" alt="inbox-page" style="zoom:20%;" /> <img src="./asset/lists-page.jpg" alt="lists-page" style="zoom:20%;" /> 
 >
 > 前端主要页面截图  
 
