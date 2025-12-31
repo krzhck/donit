@@ -30,11 +30,11 @@ export default function Completed() {
 
   return (
     <div className="">
-      <div className="px-8 pt-8">
+      <div className="page-header">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{t.completed.title}</h2>
-            <p className="text-sm text-gray-500">{t.completed.subtitle}</p>
+            <h2 className="page-title">{t.completed.title}</h2>
+            <p className="page-subtitle">{t.completed.subtitle}</p>
           </div>
           {completedCount > 0 && (
             <button
@@ -49,7 +49,7 @@ export default function Completed() {
           )}
         </div>
       </div>
-      <div className="px-8 pb-4" key={refreshKey}>
+      <div className="page-content" key={refreshKey}>
         <TaskList
           emptyTitle={t.completed.emptyTitle}
           emptySubtitle={t.completed.emptySubtitle}

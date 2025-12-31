@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { User, CircleCheckBig, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { CreateTodoModal } from './components/CreateTodoModal'
 import { ErrorNotificationCenter } from './components/ErrorNotificationCenter'
@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 
 function AppContent() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [sidebarVisible, setSidebarVisible] = useState(true)
   const { isTodoModalOpen, editingTodo, closeModal, openCreateModal, saveTodo } = useTodoModal()
 
@@ -82,6 +83,9 @@ function AppContent() {
               <NavLink to="/app/lists" className={({ isActive }) =>
                 `nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`
               }>🏷️ {t.sidebar.lists}</NavLink>
+              <NavLink to="/app/completed" className={({ isActive }) =>
+                `nav-link ${isActive ? 'nav-link-active' : 'nav-link-inactive'}`
+              }>✅ {t.sidebar.completed}</NavLink>
             </nav>
 
             <div className="sidebar-footer">
@@ -109,7 +113,7 @@ function AppContent() {
               </button>
             )}
             <div className="main-content-inner">
-              <Outlet />
+              <Outlet key={location.pathname} />
             </div>
           </main>
         </div>

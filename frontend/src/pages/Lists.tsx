@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { TaskList } from '../components/TaskList'
 import { t } from '../locales'
 import { categoriesApi, todoApi, type Category, type Todo } from '../api/Client'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { ChevronDown, ChevronRight, Plus } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus, Coffee } from 'lucide-react'
 
 export default function Lists() {
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [openMap, setOpenMap] = useState<Record<number, boolean>>({})
+  const [statsMap, setStatsMap] = useState<Record<number, { completed: number; total: number }>>({})
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null)
   const [editingName, setEditingName] = useState('')
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
@@ -28,6 +29,26 @@ export default function Lists() {
         const initialOpen: Record<number, boolean> = {}
         cats.forEach(c => { initialOpen[c.id] = false })
         setOpenMap(initialOpen)
+        
+        // 预加载所有统计数据
+        const todosRes = await todoApi.getAll()
+        const todos = todosRes.data ?? []
+        const newStatsMap: Record<number, { completed: number; total: number }> = {}
+        cats.forEach(cat => {
+          const catTodos = todos.filter((todo: Todo) => {
+            const catVal = todo.category
+            if (typeof catVal === 'object' && catVal && 'id' in catVal) {
+              return catVal.id === cat.id
+            }
+            if (typeof catVal === 'string') {
+              return catVal.trim().toLowerCase() === cat.name.trim().toLowerCase()
+            }
+            return false
+          })
+          const completed = catTodos.filter((t: Todo) => t.is_completed).length
+          newStatsMap[cat.id] = { completed, total: catTodos.length }
+        })
+        setStatsMap(newStatsMap)
       } catch (err) {
         setCategories([])
       } finally {
@@ -128,6 +149,10 @@ export default function Lists() {
 
   const nonInboxCategories = useMemo(() => categories, [categories])
 
+  const handleStatsChange = useCallback((catId: number, completed: number, total: number) => {
+    setStatsMap(prev => ({ ...prev, [catId]: { completed, total } }))
+  }, [])
+
   const startAddCategory = () => {
     setIsAddingCategory(true)
   }
@@ -160,98 +185,103 @@ export default function Lists() {
   }
 
   return (
-    <div className="px-8 pt-8 pb-4">
+    <div>
       <div className="page-header">
-        <div>
-          <h2 className="page-title">{t.lists.title}</h2>
-          <p className="page-subtitle">{t.lists.subtitle}</p>
-        </div>
+        <h2 className="page-title">{t.lists.title}</h2>
+        <p className="page-subtitle">{t.lists.subtitle}</p>
       </div>
-
-      {isLoading ? (
+      <div className="page-content">
+        {isLoading ? (
         <div className="list-loading">
           <div className="list-loading-spinner"></div>
           <p className="list-loading-text">{t.common.loading}</p>
         </div>
-      ) : nonInboxCategories.length === 0 ? (
-        <div className="list-empty-state">
-          <svg className="list-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="list-empty-title">{t.inbox.emptyTitle}</p>
-          <p className="list-empty-subtitle">{t.inbox.emptySubtitle}</p>
-        </div>
       ) : (
-        <div className="space-y-6">
-          {nonInboxCategories.map(cat => (
-            <div key={cat.id} className="rounded-lg">
-              <div className="flex items-center justify-between px-4 py-2">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    className="text-gray-500 hover:text-gray-700 p-1 rounded-md"
-                    aria-label={openMap[cat.id] ? '收起' : '展开'}
-                    onClick={() => toggleCategory(cat.id)}
-                  >
-                    {openMap[cat.id] ? (
-                      <ChevronDown size={18} />
-                    ) : (
-                      <ChevronRight size={18} />
-                    )}
-                  </button>
-                  {editingCategoryId === cat.id ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        className="form-input h-8"
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault()
-                            confirmRename()
-                          } else if (e.key === 'Escape') {
-                            e.preventDefault()
-                            cancelRename()
-                          }
-                        }}
-                      />
-                      {/* 校验提示 */}
-                      <span className="text-sm text-red-500">
-                        {!editingName.trim() ? t.category.renameEmptyError :
-                          categories.some(c => c.id !== editingCategoryId && c.name.trim().toLowerCase() === editingName.trim().toLowerCase()) ? t.category.renameDuplicateError : ''}
-                      </span>
-                      <button
-                        className="btn btn-action btn-secondary"
-                        onClick={confirmRename}
-                        disabled={!editingName.trim() || categories.some(c => c.id !== editingCategoryId && c.name.trim().toLowerCase() === editingName.trim().toLowerCase())}
-                      >
-                        {t.category.renameSave}
-                      </button>
-                      <button className="btn btn-action btn-secondary" onClick={cancelRename}>{t.category.renameCancel}</button>
-                    </div>
-                  ) : (
-                    <h3 className="text-lg font-semibold text-gray-900">{cat.name}</h3>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button className="btn btn-action btn-secondary" onClick={() => startRename(cat)}>{t.common.rename}</button>
-                  <button className="btn btn-action btn-secondary" onClick={() => requestDelete(cat)}>{t.common.delete}</button>
-                </div>
-              </div>
-              {openMap[cat.id] && (
-                <div className="px-2 pb-4">
-                  <TaskList
-                    title={cat.name}
-                    hideHeader
-                    emptyTitle={t.inbox.emptyTitle}
-                    emptySubtitle={t.inbox.emptySubtitle}
-                    filter={{ categoryId: cat.id }}
-                  />
-                </div>
-              )}
+        <div className="space-y-0">
+          {nonInboxCategories.length === 0 ? (
+            <div className="list-empty-state">
+              <Coffee className="list-empty-icon" />
+              <p className="list-empty-title">{t.category.emptyCategory}</p>
+              <p className="list-empty-subtitle">{t.category.emptyCategorySubtitle}</p>
             </div>
-          ))}
+          ) : (
+            nonInboxCategories.map(cat => (
+              <div key={cat.id} className="rounded-lg">
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2 px-2">
+                    <button
+                      type="button"
+                      className="text-gray-500 hover:text-gray-700 p-1 rounded-md"
+                      aria-label={openMap[cat.id] ? '收起' : '展开'}
+                      onClick={() => toggleCategory(cat.id)}
+                    >
+                      {openMap[cat.id] ? (
+                        <ChevronDown size={18} />
+                      ) : (
+                        <ChevronRight size={18} />
+                      )}
+                    </button>
+                    {editingCategoryId === cat.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="form-input h-8"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault()
+                              confirmRename()
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault()
+                              cancelRename()
+                            }
+                          }}
+                        />
+                        {/* 校验提示 */}
+                        <span className="text-sm text-red-500">
+                          {!editingName.trim() ? t.category.renameEmptyError :
+                            categories.some(c => c.id !== editingCategoryId && c.name.trim().toLowerCase() === editingName.trim().toLowerCase()) ? t.category.renameDuplicateError : ''}
+                        </span>
+                        <button
+                          className="btn btn-action btn-secondary"
+                          onClick={confirmRename}
+                          disabled={!editingName.trim() || categories.some(c => c.id !== editingCategoryId && c.name.trim().toLowerCase() === editingName.trim().toLowerCase())}
+                        >
+                          {t.category.renameSave}
+                        </button>
+                        <button className="btn btn-action btn-secondary" onClick={cancelRename}>{t.category.renameCancel}</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold text-gray-900">{cat.name}</h3>
+                        {statsMap[cat.id] && (
+                          <span className="text-sm text-gray-500">
+                            {statsMap[cat.id].completed}/{statsMap[cat.id].total} {t.task.completedStat}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 px-6">
+                    <button className="btn btn-action btn-secondary" onClick={() => startRename(cat)}>{t.common.rename}</button>
+                    <button className="btn btn-action btn-secondary" onClick={() => requestDelete(cat)}>{t.common.delete}</button>
+                  </div>
+                </div>
+                {openMap[cat.id] && (
+                  <div className="px-8 pb-4">
+                    <TaskList
+                      emptyTitle={t.inbox.emptyTitle}
+                      emptySubtitle={t.inbox.emptySubtitle}
+                      filter={{ categoryId: cat.id }}
+                      hideStats
+                      onStatsChange={(completed, total) => handleStatsChange(cat.id, completed, total)}
+                    />
+                  </div>
+                )}
+              </div>
+            ))
+          )}
 
           {/* 添加分类 */}
           <div className="px-4">
@@ -304,7 +334,8 @@ export default function Lists() {
             )}
           </div>
         </div>
-      )}
+        )}
+      </div>
 
       <ConfirmDialog
         open={isConfirmOpen}

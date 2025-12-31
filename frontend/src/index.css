@@ -50,6 +50,22 @@ body {
   @apply space-y-1 flex-1;
 }
 
+.page-header {
+  @apply px-8 pt-8;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.page-subtitle {
+  @apply text-sm text-gray-500;
+}
+
+.page-content {
+  @apply mt-4 px-2;
+}
+
 .sidebar-button-container {
   @apply mt-0 px-0 py-2;
 }
@@ -266,7 +282,7 @@ body {
 }
 
 .list-stats {
-  @apply mt-4 px-2 py-2 flex items-center justify-end text-sm text-gray-600;
+  @apply mt-4 px-2 py-0 flex items-center justify-end text-sm text-gray-600;
 }
 
 /* Todo Items */

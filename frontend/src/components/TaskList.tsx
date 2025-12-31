@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Coffee } from 'lucide-react'
 import { todoApi, type Todo } from '../api/Client'
 import { useTodoModal, type TodoSavePayload } from '../contexts/TodoModalContext'
 import { ConfirmDialog } from './ConfirmDialog'
@@ -53,26 +54,27 @@ type TaskListFilter = {
   category?: string
   categoryId?: number
   taskDateIsToday?: boolean
+  isCompleted?: boolean
 }
 
 interface TaskListProps {
-  title: string
-  subtitle?: string
   emptyTitle?: string
   emptySubtitle?: string
   filter?: TaskListFilter
   includePlaceholders?: boolean
-  hideHeader?: boolean
+  onStatsChange?: (completed: number, total: number) => void
+  hideStats?: boolean
+  hideContent?: boolean
 }
 
 export function TaskList({
-  title,
-  subtitle,
   emptyTitle = t.inbox.emptyTitle,
   emptySubtitle = t.inbox.emptySubtitle,
   filter,
   includePlaceholders = false,
-  hideHeader = false,
+  onStatsChange,
+  hideStats = false,
+  hideContent = false,
 }: TaskListProps) {
   const [allTodos, setAllTodos] = useState<LocalTodo[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -93,11 +95,16 @@ export function TaskList({
       if (filter?.category && t.category !== filter.category) return false
       if (filter?.categoryId && t.categoryId !== filter.categoryId) return false
       if (filter?.taskDateIsToday) return t.taskDate === todayStr
+      if (filter?.isCompleted !== undefined && t.completed !== filter.isCompleted) return false
       return true
     })
   }, [allTodos, filter, includePlaceholders, todayStr])
 
   const completedCount = useMemo(() => filteredTodos.filter(t => t.completed).length, [filteredTodos])
+
+  useEffect(() => {
+    onStatsChange?.(completedCount, filteredTodos.length)
+  }, [completedCount, filteredTodos.length])
 
   const handleSaveTodo = useCallback(async (payload: TodoSavePayload) => {
     const { id, title, description, taskDate, categoryId } = payload
@@ -247,18 +254,9 @@ export function TaskList({
   }
 
   return (
-    <div className="">
-      {/* Title */}
-      {!hideHeader && (
-        <div className="page-header">
-          <div>
-            <h2 className="page-title">{title}</h2>
-            <p className="page-subtitle">{filteredTodos.length} {t.task.countSuffix}{subtitle ? ` · ${subtitle}` : ''}</p>
-          </div>
-        </div>
-      )}
-
+    <>
       {/* List */}
+      {!hideContent && (
       <div className="list-container">
         {isLoading ? (
           <div className="list-loading">
@@ -267,9 +265,7 @@ export function TaskList({
           </div>
         ) : filteredTodos.length === 0 ? (
           <div className="list-empty-state">
-            <svg className="list-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Coffee className="list-empty-icon" />
             <p className="list-empty-title">{emptyTitle}</p>
             <p className="list-empty-subtitle">{emptySubtitle}</p>
           </div>
@@ -319,9 +315,10 @@ export function TaskList({
           </div>
         )}
       </div>
+      )}
 
       {/* Stats */}
-      {filteredTodos.length > 0 && (
+      {!hideStats && filteredTodos.length > 0 && (
         <div className="list-stats">
           <span>{completedCount} / {filteredTodos.length} {t.task.completedStat}</span>
         </div>
@@ -346,7 +343,7 @@ export function TaskList({
           setTodoToDelete(null)
         }}
       />
-    </div>
+    </>
   )
 }
 

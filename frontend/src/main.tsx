@@ -6,6 +6,7 @@ import App from './App.tsx'
 import Inbox from './pages/Inbox.tsx'
 import Today from './pages/Today.tsx'
 import Lists from './pages/Lists.tsx'
+import Completed from './pages/Completed.tsx'
 import Profile from './pages/Profile.tsx'
 import { TodoModalProvider } from './contexts/TodoModalContext'
 
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: 'inbox', element: <Inbox /> },
       { path: 'today', element: <Today /> },
       { path: 'lists', element: <Lists /> },
+      { path: 'completed', element: <Completed /> },
       { path: 'profile', element: <Profile /> },
     ],
   },

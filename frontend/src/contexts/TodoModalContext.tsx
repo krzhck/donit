@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
+import { todoApi } from '../api/Client'
 
 export type TodoSavePayload = {
   id?: number
@@ -49,8 +50,29 @@ export function TodoModalProvider({ children }: { children: ReactNode }) {
   const saveTodo = useCallback(async (payload: TodoSavePayload) => {
     if (saveCallback) {
       await saveCallback(payload)
-    } else {
-      console.warn('No save callback registered for TodoModal')
+      return
+    }
+
+    // Fallback: when no TaskList is mounted (e.g., Profile page or collapsed Lists), still persist to backend
+    const { id, title, description, taskDate, categoryId, mode } = payload
+    try {
+      if (mode === 'edit' && typeof id === 'number') {
+        await todoApi.update(id, {
+          title,
+          description,
+          category_id: categoryId,
+          task_date: taskDate ?? undefined,
+        })
+      } else {
+        await todoApi.create({
+          title,
+          description,
+          category_id: categoryId,
+          task_date: taskDate ?? undefined,
+        })
+      }
+    } catch (err) {
+      // Errors are handled by axios interceptor
     }
   }, [saveCallback])
 

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { ReactNode } from 'react'
 
 interface ModalProps {
@@ -22,7 +23,7 @@ export function Modal({ open, title, children, footer, onClose, widthClass }: Mo
 
   if (!open) return null
 
-  return (
+  const modalContent = (
     <div className="modal-backdrop">
       <div className="modal-overlay" onClick={onClose} />
       <div className={`modal-content ${widthClass ?? 'max-w-md'}`}>
@@ -42,4 +43,6 @@ export function Modal({ open, title, children, footer, onClose, widthClass }: Mo
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }
